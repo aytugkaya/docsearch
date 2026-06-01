@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>SOP Bot</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+    <script src="/static/app.js" defer></script>
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="chat-card">
+        <header class="chat-header">
+          <h1>SOP Bot</h1>
+          <p>Ask about a company SOP.</p>
+        </header>
+
+        <div id="messages" class="messages" aria-live="polite"></div>
+
+        <form id="chat-form" class="chat-form">
+          <textarea
+            id="message-input"
+            name="message"
+            rows="3"
+            placeholder="Ask a question, e.g. I need SOP for Mike"
+            required
+          ></textarea>
+
+          <div class="actions">
+            <button type="submit">Send</button>
+          </div>
+        </form>
+      </section>
+    </main>
+  </body>
+</html>
