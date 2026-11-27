@@ -128,6 +128,25 @@ body {
   cursor: not-allowed;
 }
 
+.actions .restart-button {
+  background: #b91c1c;
+  color: #fff;
+  border: 1px solid #b91c1c;
+  border-radius: 8px;
+  padding: 0.55rem 0.9rem;
+  cursor: pointer;
+}
+
+.actions .restart-button:hover:not(:disabled) {
+  background: #991b1b;
+}
+
+.actions .restart-button:disabled {
+  background: #b91c1c;
+  opacity: 0.6;
+  cursor: wait;
+}
+
 @media (max-width: 640px) {
   .app-shell {
     padding: 0;

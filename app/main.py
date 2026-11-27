@@ -7,7 +7,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
 
-from app.workflow import handle_turn
+from app.workflow_best2 import handle_turn
 
 
 app = FastAPI(title="SOP Bot")
@@ -36,6 +36,12 @@ class ChatResponse(BaseModel):
     event_type: str
     workflow_state: dict
 
+@app.post("/reset-all")
+async def reset_all_sessions():
+    cleared = len(SESSIONS)
+    SESSIONS.clear()
+    return {"ok": True, "cleared": cleared}
+
 
 @app.post("/chat", response_model=ChatResponse)
 async def chat(req: ChatRequest):
@@ -48,6 +54,14 @@ async def chat(req: ChatRequest):
             "message_history": [],
         },
     )
+
+    print(
+    f"/chat supplied_id={bool(req.session_id)} "
+    f"session_found={session_id in SESSIONS} "
+    f"prior_status={getattr(session['workflow_state'], 'status', None)}",
+    flush=True,
+    )
+
 
     result = await handle_turn(
         user_input=req.message,
