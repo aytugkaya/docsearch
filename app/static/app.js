@@ -7,7 +7,7 @@ const sendButton = form.querySelector(
 const restartButton = document.getElementById("restart-btn");
 
 let sessionId = null;
-let busy = false;
+let busy = false; 
 
 function addMessage(text, role) {
   const div = document.createElement("div");
