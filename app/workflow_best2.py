@@ -15,6 +15,10 @@ from pydantic import BaseModel, ConfigDict, Field
 from pydantic_ai import Agent, RunContext
 from dataclasses import dataclass, field
 from pydantic_ai import Agent, ModelRetry, RunContext
+import asyncio
+import os
+
+from app.sop_retrieval import SopIndexError, retrieve_sop_chunks
 
 logger = logging.getLogger(__name__)
 
@@ -486,10 +490,52 @@ qa_agent = Agent(
 )
 
 
-async def answer_from_sop(user_question: str, sop_path: str) -> SopAnswer:
-    sop_text = read_docx_text(sop_path)
+# async def answer_from_sop(user_question: str, sop_path: str) -> SopAnswer:
+#     sop_text = read_docx_text(sop_path)
+#     result = await qa_agent.run(
+#         f"User question:\n{user_question}\n\nSelected SOP:\n{sop_text}"
+#     )
+#     return result.output
+
+# async def answer_from_sop(
+#     user_question: str,
+#     sop_path: str,
+#     *,
+#     n: int | None = None,
+# ) -> SopAnswer:
+#     top_n = n if n is not None else int(os.getenv("SOP_TOP_N", "4"))
+
+#     try:
+#         chunks = await asyncio.to_thread(
+#             retrieve_sop_chunks, user_question, sop_path, n=top_n
+#         )
+#     except SopIndexError:
+#         logger.exception("SOP retrieval unavailable for %s", sop_path)
+#         return SopAnswer(
+#             answer="I found the selected SOP, but its search index is unavailable."
+#         )
+
+#     excerpts = "\n\n".join(f"[Chunk {number}]\n{text}" for number, text in chunks)
+#     result = await qa_agent.run(
+#         f"User question:\n{user_question}\n\nSelected SOP excerpts:\n{excerpts}"
+#     )
+#     return result.output
+
+async def answer_from_sop(
+    user_question: str, sop_path: str, *, n: int | None = None
+) -> SopAnswer:
+    top_n = n if n is not None else int(os.getenv("SOP_TOP_N", "4"))
+    try:
+        chunks = await asyncio.to_thread(
+            retrieve_sop_chunks, user_question, sop_path, n=top_n
+        )
+    except SopIndexError:
+        logger.exception("SOP retrieval failed for %s", sop_path)
+        return SopAnswer(answer="I couldn't search the selected SOP right now.")
+
+    excerpts = "\n\n".join(f"[Chunk {i}]\n{text}" for i, text in chunks)
     result = await qa_agent.run(
-        f"User question:\n{user_question}\n\nSelected SOP:\n{sop_text}"
+        f"User question:\n{user_question}\n\nSelected SOP excerpts:\n{excerpts}"
     )
     return result.output
 
